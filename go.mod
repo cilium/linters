@@ -1,4 +1,4 @@
-module github.com/cilium/customvet
+module github.com/cilium/linters
 
 go 1.19
 
