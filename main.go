@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/cilium/customvet/analysis/ioreadall"
-	"github.com/cilium/customvet/analysis/timeafter"
+	"github.com/cilium/customvet/ioreadall"
+	"github.com/cilium/customvet/timeafter"
 
 	"golang.org/x/tools/go/analysis/multichecker"
 )
