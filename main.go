@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Authors of Cilium
 
+// Package main creates the main function to run all analyzers in this module.
 package main
 
 import (

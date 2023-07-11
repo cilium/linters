@@ -14,18 +14,16 @@ import (
 )
 
 const (
-	// Doc for the timeafter check
-	Doc = `This checks for "io.ReadAll" instances.`
-
 	readAllFunc = "ReadAll"
 )
 
 var ioReadAllPkgs = []string{"io", "ioutil"}
 
-// Analyzer is the global for the multichecker
+// Analyzer implements an analysis function that checks for the use of
+// io.ReadAll.
 var Analyzer = &analysis.Analyzer{
 	Name:     "readall",
-	Doc:      Doc,
+	Doc:      `check for "io.ReadAll" instances`,
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 	Run:      run,
 }
@@ -34,15 +32,6 @@ var ignoreArg string
 
 func init() {
 	Analyzer.Flags.StringVar(&ignoreArg, "ignore", "", `list of packages to ignore (e.g. "readall,config")`)
-}
-
-type visitor func(ast.Node) bool
-
-func (v visitor) Visit(node ast.Node) ast.Visitor {
-	if v(node) {
-		return v
-	}
-	return nil
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
