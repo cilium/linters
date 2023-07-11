@@ -14,17 +14,15 @@ import (
 )
 
 const (
-	// Doc for the timeafter check
-	Doc = `This is checks for "time.After" instances in for loops.`
-
 	timeAfterPkg  = "time"
 	timeAfterFunc = "After"
 )
 
-// Analyzer is the global for the multichecker
+// Analyzer implements an analysis function that checks for the use of
+// time.After in loops.
 var Analyzer = &analysis.Analyzer{
 	Name:     "timeafter",
-	Doc:      Doc,
+	Doc:      `check for "time.After" instances in loops`,
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 	Run:      run,
 }
