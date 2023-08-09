@@ -16,11 +16,9 @@ jobs:
           - tip
         include:
           - name: oldstable
-            version: "1.19"
-          - name: stable
             version: "1.20"
-          - name: tip
-            version: "1.21.0-rc.3"
+          - name: stable
+            version: "1.21"
     runs-on: ubuntu-latest
     steps:
       - name: Install Go v${{ matrix.name }}
@@ -43,11 +41,9 @@ jobs:
           - tip
         include:
           - name: oldstable
-            version: "1.19"
-          - name: stable
             version: "1.20"
-          - name: tip
-            version: "1.21.0-rc.3"
+          - name: stable
+            version: "1.21"
     runs-on: ubuntu-latest
     steps:
       - name: Install Go v${{ matrix.name }}
@@ -68,11 +64,9 @@ jobs:
           - tip
         include:
           - name: oldstable
-            version: "1.19"
-          - name: stable
             version: "1.20"
-          - name: tip
-            version: "1.21.0-rc.3"
+          - name: stable
+            version: "1.21"
     runs-on: ubuntu-latest
     steps:
       - name: Install Go v${{ matrix.name }}
