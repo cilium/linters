@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go v${{ matrix.name }}
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
         with:
           go-version: ${{ matrix.version }}
       - name: Checkout code
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go v${{ matrix.name }}
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
         with:
           go-version: ${{ matrix.version }}
       - name: Checkout code
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go v${{ matrix.name }}
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
         with:
           go-version: ${{ matrix.version }}
       - name: Checkout code
