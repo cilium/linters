@@ -87,7 +87,7 @@ jobs:
       - name: Run golangci lint
         uses: golangci/golangci-lint-action@aaa42aa0628b4ae2578232a66b541047968fac86
         with:
-          version: v1.58.1
+          version: v1.61.0
           # use our .golangci.yml and configure output to be logged in the GHA,
           # in addition to annotating the commit.  see
           # https://github.com/golangci/golangci-lint-action/issues/119#issuecomment-981090648
