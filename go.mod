@@ -1,6 +1,6 @@
 module github.com/cilium/linters
 
-go 1.21
+go 1.22
 
 require (
 	golang.org/x/exp v0.0.0-20230809094429-853ea248256d
