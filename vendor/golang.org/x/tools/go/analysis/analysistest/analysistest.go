@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -35,6 +36,12 @@ import (
 // and populates it with a GOPATH-style project using filemap (which
 // maps file names to contents). On success it returns the name of the
 // directory and a cleanup function to delete it.
+//
+// TODO(adonovan): provide a newer version that accepts a testing.T,
+// calls T.TempDir, and calls T.Fatal on any error, avoiding the need
+// to return cleanup or err:
+//
+//	func WriteFilesToTmp(t *testing.T filemap map[string]string) string
 func WriteFiles(filemap map[string]string) (dir string, cleanup func(), err error) {
 	gopath, err := os.MkdirTemp("", "analysistest")
 	if err != nil {
@@ -167,50 +174,27 @@ func RunWithSuggestedFixes(t Testing, dir string, a *analysis.Analyzer, patterns
 		act := result.Action
 
 		// file -> message -> edits
+		// TODO(adonovan): this mapping assumes fix.Messages are unique across analyzers,
+		// whereas they are only unique within a given Diagnostic.
 		fileEdits := make(map[*token.File]map[string][]diff.Edit)
-		fileContents := make(map[*token.File][]byte)
 
-		// Validate edits, prepare the fileEdits map and read the file contents.
+		// We may assume that fixes are validated upon creation in Pass.Report.
+		// Group fixes by file and message.
 		for _, diag := range act.Diagnostics {
 			for _, fix := range diag.SuggestedFixes {
-
 				// Assert that lazy fixes have a Category (#65578, #65087).
 				if inTools && len(fix.TextEdits) == 0 && diag.Category == "" {
 					t.Errorf("missing Diagnostic.Category for SuggestedFix without TextEdits (gopls requires the category for the name of the fix command")
 				}
 
 				for _, edit := range fix.TextEdits {
-					start, end := edit.Pos, edit.End
-					if !end.IsValid() {
-						end = start
-					}
-					// Validate the edit.
-					if start > end {
-						t.Errorf(
-							"diagnostic for analysis %v contains Suggested Fix with malformed edit: pos (%v) > end (%v)",
-							act.Analyzer.Name, start, end)
-						continue
-					}
-					file, endfile := act.Package.Fset.File(start), act.Package.Fset.File(end)
-					if file == nil || endfile == nil || file != endfile {
-						t.Errorf(
-							"diagnostic for analysis %v contains Suggested Fix with malformed spanning files %v and %v",
-							act.Analyzer.Name, file.Name(), endfile.Name())
-						continue
-					}
-					if _, ok := fileContents[file]; !ok {
-						contents, err := os.ReadFile(file.Name())
-						if err != nil {
-							t.Errorf("error reading %s: %v", file.Name(), err)
-						}
-						fileContents[file] = contents
-					}
+					file := act.Package.Fset.File(edit.Pos)
 					if _, ok := fileEdits[file]; !ok {
 						fileEdits[file] = make(map[string][]diff.Edit)
 					}
 					fileEdits[file][fix.Message] = append(fileEdits[file][fix.Message], diff.Edit{
-						Start: file.Offset(start),
-						End:   file.Offset(end),
+						Start: file.Offset(edit.Pos),
+						End:   file.Offset(edit.End),
 						New:   string(edit.NewText),
 					})
 				}
@@ -219,9 +203,10 @@ func RunWithSuggestedFixes(t Testing, dir string, a *analysis.Analyzer, patterns
 
 		for file, fixes := range fileEdits {
 			// Get the original file contents.
-			orig, ok := fileContents[file]
-			if !ok {
-				t.Errorf("could not find file contents for %s", file.Name())
+			// TODO(adonovan): plumb pass.ReadFile.
+			orig, err := os.ReadFile(file.Name())
+			if err != nil {
+				t.Errorf("error reading %s: %v", file.Name(), err)
 				continue
 			}
 
@@ -242,8 +227,15 @@ func RunWithSuggestedFixes(t Testing, dir string, a *analysis.Analyzer, patterns
 					t.Errorf("%s.golden has leading comment; we don't know what to do with it", file.Name())
 					continue
 				}
-
-				for sf, edits := range fixes {
+				// Sort map keys for determinism in tests.
+				// TODO(jba): replace with slices.Sorted(maps.Keys(fixes)) when go.mod >= 1.23.
+				var keys []string
+				for k := range fixes {
+					keys = append(keys, k)
+				}
+				slices.Sort(keys)
+				for _, sf := range keys {
+					edits := fixes[sf]
 					found := false
 					for _, vf := range ar.Files {
 						if vf.Name == sf {
@@ -266,10 +258,17 @@ func RunWithSuggestedFixes(t Testing, dir string, a *analysis.Analyzer, patterns
 				}
 			} else {
 				// all suggested fixes are represented by a single file
-
+				// TODO(adonovan): fix: this makes no sense if len(fixes) > 1.
+				// Sort map keys for determinism in tests.
+				// TODO(jba): replace with slices.Sorted(maps.Keys(fixes)) when go.mod >= 1.23.
+				var keys []string
+				for k := range fixes {
+					keys = append(keys, k)
+				}
+				slices.Sort(keys)
 				var catchallEdits []diff.Edit
-				for _, edits := range fixes {
-					catchallEdits = append(catchallEdits, edits...)
+				for _, k := range keys {
+					catchallEdits = append(catchallEdits, fixes[k]...)
 				}
 
 				if err := applyDiffsAndCompare(orig, ar.Comment, catchallEdits, file.Name()); err != nil {
