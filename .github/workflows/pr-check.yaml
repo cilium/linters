@@ -10,21 +10,13 @@ jobs:
   go-mod:
     strategy:
       matrix:
-        name:
-          - oldstable
-          - stable
-          - tip
-        include:
-          - name: oldstable
-            version: "1.25"
-          - name: stable
-            version: "1.26"
+        go-version: ["oldstable", "stable"]
     runs-on: ubuntu-latest
     steps:
-      - name: Install Go v${{ matrix.name }}
+      - name: Install ${{ matrix.go-version }} Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417
         with:
-          go-version: ${{ matrix.version }}
+          go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Check module vendoring
@@ -35,21 +27,13 @@ jobs:
   build:
     strategy:
       matrix:
-        name:
-          - oldstable
-          - stable
-          - tip
-        include:
-          - name: oldstable
-            version: "1.25"
-          - name: stable
-            version: "1.26"
+        go-version: ["oldstable", "stable"]
     runs-on: ubuntu-latest
     steps:
-      - name: Install Go v${{ matrix.name }}
+      - name: Install ${{ matrix.go-version }} Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417
         with:
-          go-version: ${{ matrix.version }}
+          go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Go code prechecks
@@ -58,21 +42,13 @@ jobs:
   unit-test:
     strategy:
       matrix:
-        name:
-          - oldstable
-          - stable
-          - tip
-        include:
-          - name: oldstable
-            version: "1.25"
-          - name: stable
-            version: "1.26"
+        go-version: ["oldstable", "stable"]
     runs-on: ubuntu-latest
     steps:
-      - name: Install Go v${{ matrix.name }}
+      - name: Install ${{ matrix.go-version }} Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417
         with:
-          go-version: ${{ matrix.version }}
+          go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Go code prechecks
